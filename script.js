@@ -419,10 +419,6 @@
             </div>`).join('')}
         </div>
         ${hidden.length > 0 ? `
-          <button class="changelog-expand-btn cmap-expand" aria-expanded="false" type="button" style="margin-top:12px;margin-left:-4px;">
-            <span>+${hidden.length} more</span>
-            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
-          </button>
           <div class="changelog-collapsed" style="margin-top:8px;">
             <div style="display:flex;flex-direction:column;gap:9px;">
               ${hidden.map(({ type, item }) => `
@@ -431,7 +427,11 @@
                   <span><span class="changelog-item-type ${typeClass(type)}">${type}</span>${escHtml(item)}</span>
                 </div>`).join('')}
             </div>
-          </div>` : ''}
+          </div>
+          <button class="changelog-expand-btn cmap-expand" aria-expanded="false" type="button" style="margin-top:12px;margin-left:-4px;">
+            <span>+${hidden.length} more</span>
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>` : ''}
       `;
 
       cardEl.addEventListener('mouseenter', () => {
