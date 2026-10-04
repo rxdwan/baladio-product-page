@@ -15,4 +15,4 @@ This repository contains the landing page for Baladio. This was made with the he
 ## Links
 
 - **Baladio App Repo**: [github.com/rxdwan/Baladio](https://github.com/rxdwan/Baladio)
-- **Baladio Installer**: [github.com/rxdwan/baladio_installer](https://github.com/rxdwan/baladio_installer)
+- **Baladio Installer**: [github.com/rxdwan/baladio_installer](https://github.com/rxdwan/baladio-installer)
