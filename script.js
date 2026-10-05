@@ -291,9 +291,15 @@
 /* ---- Changelog: fetch, parse, render ---- */
 (function initChangelog() {
   const loadingEl = document.getElementById('changelog-loading');
-  const MD_URL = 'https://raw.githubusercontent.com/rxdwan/Baladio/main/CHANGELOG.md';
+  const REMOTE_URL = 'https://raw.githubusercontent.com/rxdwan/Baladio/main/CHANGELOG.md';
 
-  fetch(MD_URL)
+  function fetchWithTimeout(url, ms) {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), ms);
+    return fetch(url, { signal: controller.signal }).finally(() => clearTimeout(timer));
+  }
+
+  fetchWithTimeout(REMOTE_URL, 6000)
     .then((r) => {
       if (!r.ok) throw new Error('Fetch failed');
       return r.text();
@@ -304,7 +310,6 @@
       renderChangelog(versions);
     })
     .catch(() => {
-      const wrap = document.getElementById('changelog-map-wrap');
       if (loadingEl) {
         loadingEl.innerHTML = '<p style="text-align:center;color:var(--text-muted);font-size:0.875rem;">Could not load changelog. <a href="https://github.com/rxdwan/Baladio/blob/main/CHANGELOG.md" target="_blank" rel="noopener noreferrer" style="color:var(--accent-1);">View on GitHub</a></p>';
       }
