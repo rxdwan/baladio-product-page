@@ -13,6 +13,6 @@
 This repository contains the landing page for Baladio. This was made with the help of a few ai agents.
 
 ## Links
-
+- **Baladio Product Page**: [Baladio Product Page](https://rxdwan.github.io/baladio-product-page)
 - **Baladio App Repo**: [github.com/rxdwan/Baladio](https://github.com/rxdwan/Baladio)
 - **Baladio Installer**: [github.com/rxdwan/baladio-installer](https://github.com/rxdwan/baladio-installer)

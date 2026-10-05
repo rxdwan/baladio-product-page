@@ -47,6 +47,27 @@
 
 /* ---- Sparkles removed by user request ---- */
 
+/* ---- Hero video: load as Blob to bypass IDM interception ---- */
+(function initHeroVideo() {
+  const video = document.getElementById('hero-video');
+  if (!video) return;
+  // Fetch the video as a binary blob, then create an in-memory URL.
+  // IDM cannot intercept blob: URLs — they have no HTTP address to grab.
+  fetch('assets/demo.mp4')
+    .then(r => r.blob())
+    .then(blob => {
+      const url = URL.createObjectURL(blob);
+      video.src = url;
+      video.load();
+      video.play().catch(() => {});
+    })
+    .catch(() => {
+      // Fallback: direct src if fetch fails (e.g. file:// protocol)
+      video.src = 'assets/demo.mp4';
+      video.play().catch(() => {});
+    });
+})();
+
 /* ---- Comet Animation (Canvas) ---- */
 (function initComets() {
   const canvas = document.getElementById('comet-canvas');
