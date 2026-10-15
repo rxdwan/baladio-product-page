@@ -1936,3 +1936,131 @@ section {
   transition: opacity 0.24s cubic-bezier(0.4, 0, 0.2, 1), transform 0.24s cubic-bezier(0.4, 0, 0.2, 1);
   will-change: opacity, transform;
 }
+
+/* ============================================
+   OS PICKER CARDS (Download Section)
+   ============================================ */
+
+.download-version-badge {
+  text-align: center;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin: 0 auto 28px;
+  letter-spacing: 0.04em;
+}
+
+.os-cards {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-bottom: 28px;
+}
+
+.os-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 24px 28px 20px;
+  background: var(--surface-2, rgba(255,255,255,0.04));
+  border: 1px solid var(--border, rgba(255,255,255,0.1));
+  border-radius: 16px;
+  cursor: pointer;
+  min-width: 130px;
+  transition: border-color 0.2s ease, background 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+  color: var(--text-primary, #e8e0f0);
+}
+
+.os-card:hover {
+  border-color: rgba(179, 157, 219, 0.5);
+  background: rgba(179, 157, 219, 0.07);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(126, 87, 194, 0.15);
+}
+
+.os-card.active {
+  border-color: var(--accent-1, #b39ddb);
+  background: rgba(179, 157, 219, 0.12);
+  box-shadow: 0 0 0 1px var(--accent-1, #b39ddb), 0 8px 24px rgba(126, 87, 194, 0.2);
+}
+
+.os-card-icon {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0.85;
+}
+
+.os-card-icon svg {
+  width: 36px;
+  height: 36px;
+}
+
+.os-card-body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+}
+
+.os-card-name {
+  font-size: 0.95rem;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+}
+
+.os-card-ext {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  font-family: 'DM Mono', monospace, sans-serif;
+  letter-spacing: 0.04em;
+}
+
+.os-card-detected {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--accent-1, #b39ddb);
+  background: rgba(179, 157, 219, 0.14);
+  border-radius: 100px;
+  padding: 2px 7px 2px 5px;
+}
+
+.os-download-row {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 32px;
+}
+
+.os-download-hint {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  margin: 0;
+}
+
+@media (max-width: 480px) {
+  .os-cards {
+    gap: 10px;
+  }
+  .os-card {
+    min-width: 100px;
+    padding: 18px 16px 14px;
+  }
+  .os-card-icon svg {
+    width: 28px;
+    height: 28px;
+  }
+}

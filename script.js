@@ -181,51 +181,139 @@
 
 /* ---- Download: fetch latest release from GitHub API ---- */
 (function initDownload() {
-  const metaEl  = document.getElementById('download-meta');
-  const btn     = document.getElementById('download-btn');
+  const metaEl   = document.getElementById('download-meta');
+  const btn      = document.getElementById('download-btn');
   const btnLabel = document.getElementById('download-btn-label');
+  const hintEl   = document.getElementById('os-download-hint');
+  const heroDlLabel = document.getElementById('hero-download-label');
 
-  const API_URL = 'https://api.github.com/repos/rxdwan/Baladio-Installer/releases/latest';
+  const API_URL  = 'https://api.github.com/repos/rxdwan/Baladio/releases/latest';
 
+  // Map of OS → asset matchers and display info
+  const OS_CONFIG = {
+    windows: {
+      label:    'Windows',
+      ext:      '.exe',
+      match:    (name) => name.endsWith('.exe') && !name.endsWith('.blockmap'),
+    },
+    mac: {
+      label:    'macOS',
+      ext:      '.dmg',
+      match:    (name) => name.endsWith('.dmg') && !name.endsWith('.blockmap'),
+    },
+    linux: {
+      label:    'Linux',
+      ext:      '.deb',
+      match:    (name) => name.endsWith('.deb'),
+    },
+  };
+
+  // Stored release assets keyed by OS key
+  let releaseAssets = {};
+  let releaseUrl    = 'https://github.com/rxdwan/Baladio/releases/latest';
+  let selectedOS    = null;
+
+  function detectOS() {
+    const ua = navigator.userAgent.toLowerCase();
+    if (ua.includes('win'))   return 'windows';
+    if (ua.includes('mac'))   return 'mac';
+    if (ua.includes('linux')) return 'linux';
+    return 'unknown';
+  }
+
+  function updateDownloadBtn(os) {
+    if (!btn || !btnLabel) return;
+    const cfg   = OS_CONFIG[os];
+    const asset = releaseAssets[os];
+    if (cfg) {
+      btn.href          = asset ? asset.browser_download_url : releaseUrl;
+      btnLabel.textContent = `Download for ${cfg.label}`;
+      btn.setAttribute('aria-label', `Download Baladio for ${cfg.label}`);
+      if (hintEl) hintEl.style.display = 'none';
+    }
+  }
+
+  function selectOSCard(os) {
+    selectedOS = os;
+    // Toggle active class
+    document.querySelectorAll('.os-card').forEach((card) => {
+      card.classList.toggle('active', card.dataset.os === os);
+    });
+    updateDownloadBtn(os);
+  }
+
+  function initOSCards() {
+    const detectedOS = detectOS();
+
+    // Update hero CTA label
+    if (heroDlLabel) {
+      const cfg = OS_CONFIG[detectedOS];
+      heroDlLabel.textContent = cfg ? `Download for ${cfg.label}` : 'Download';
+    }
+
+    // Show "Detected" badge on the right card
+    ['windows', 'mac', 'linux'].forEach((os) => {
+      const badge = document.getElementById(`${os}-detected`);
+      if (badge) badge.style.display = (os === detectedOS) ? 'flex' : 'none';
+    });
+
+    // Wire up card click events
+    document.querySelectorAll('.os-card').forEach((card) => {
+      card.addEventListener('click', () => selectOSCard(card.dataset.os));
+    });
+
+    // Auto-select detected OS
+    if (OS_CONFIG[detectedOS]) {
+      selectOSCard(detectedOS);
+    }
+  }
+
+  // Fetch release data
   fetch(API_URL)
     .then((r) => {
       if (!r.ok) throw new Error('API error');
       return r.json();
     })
     .then((data) => {
-      const version = data.tag_name || data.name || 'Latest';
+      const version      = data.tag_name || data.name || 'Latest';
       const publishedRaw = data.published_at;
-      const date = publishedRaw
+      const date         = publishedRaw
         ? new Date(publishedRaw).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
         : '';
 
-      const exeAsset = (data.assets || []).find((a) => a.name.endsWith('.exe'));
+      releaseUrl = data.html_url || releaseUrl;
 
       if (metaEl) {
         metaEl.textContent = `Version ${version}${date ? ' \u00b7 Released ' + date : ''}`;
       }
 
-      if (exeAsset && btn) {
-        btn.href = exeAsset.browser_download_url;
-        if (btnLabel) btnLabel.textContent = `Download ${exeAsset.name}`;
-      } else if (btn) {
-        btn.href = data.html_url || 'https://github.com/rxdwan/Baladio-Installer/releases/latest';
-        if (btnLabel) btnLabel.textContent = 'Download .exe';
-      }
+      // Map assets by OS
+      (data.assets || []).forEach((asset) => {
+        Object.entries(OS_CONFIG).forEach(([os, cfg]) => {
+          if (!releaseAssets[os] && cfg.match(asset.name)) {
+            releaseAssets[os] = asset;
+            // Update ext label in card
+            const extEl = document.getElementById(`${os}-ext`);
+            if (extEl) extEl.textContent = asset.name.substring(asset.name.lastIndexOf('.'));
+          }
+        });
+      });
+
+      // Refresh download button for currently selected OS
+      if (selectedOS) updateDownloadBtn(selectedOS);
     })
     .catch(() => {
       if (metaEl) metaEl.textContent = 'Latest release';
-      if (btn) btn.href = 'https://github.com/rxdwan/Baladio-Installer/releases/latest';
     });
 
   /* Download Section Interactive Q&A Logic */
   const techYesBtn = document.getElementById('btn-tech-yes');
-  const techNoBtn = document.getElementById('btn-tech-no');
+  const techNoBtn  = document.getElementById('btn-tech-no');
   const interactiveQ = document.getElementById('download-interactive');
-  const nonTechView = document.getElementById('download-non-tech');
-  const techView = document.getElementById('download-tech');
-  const resetBtn = document.getElementById('btn-reset-download');
-  const termBody = document.getElementById('terminal-commands');
+  const nonTechView  = document.getElementById('download-non-tech');
+  const techView     = document.getElementById('download-tech');
+  const resetBtn     = document.getElementById('btn-reset-download');
+  const termBody     = document.getElementById('terminal-commands');
 
   function detectOS() {
     const ua = navigator.userAgent.toLowerCase();
@@ -327,6 +415,7 @@
     techNoBtn.addEventListener('click', () => {
       interactiveQ.style.display = 'none';
       nonTechView.style.display = 'block';
+      initOSCards();
     });
 
     resetBtn.addEventListener('click', () => {
@@ -704,6 +793,16 @@ function initScrollReveal() {
 // Reveal cards on load
 document.addEventListener('DOMContentLoaded', () => {
   initScrollReveal();
+  // Set hero download label based on detected OS (runs regardless of Q&A)
+  (function setHeroLabel() {
+    const ua = navigator.userAgent.toLowerCase();
+    const label = document.getElementById('hero-download-label');
+    if (!label) return;
+    if (ua.includes('win'))   label.textContent = 'Download for Windows';
+    else if (ua.includes('mac')) label.textContent = 'Download for macOS';
+    else if (ua.includes('linux')) label.textContent = 'Download for Linux';
+    else label.textContent = 'Download';
+  })();
 
   // Full screen button listener
   const fsBtn = document.getElementById('fullscreen-btn');
@@ -861,4 +960,3 @@ document.addEventListener('DOMContentLoaded', () => {
     btn.classList.toggle('visible', window.scrollY > 120);
   });
 })();
-

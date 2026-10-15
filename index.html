@@ -6,7 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Baladio</title>
   <meta name="description"
-    content="Baladio is a beautiful, privacy-first local music player for Windows. No subscriptions, no algorithms, no corporate middlemen. Just your music." />
+    content="Baladio is a beautiful, privacy-first local music player for Windows, macOS, and Linux. No subscriptions, no algorithms, no corporate middlemen. Just your music." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link
@@ -71,7 +71,7 @@
               <polyline points="7 10 12 15 17 10" />
               <line x1="12" y1="15" x2="12" y2="3" />
             </svg>
-            Download for Windows
+            <span id="hero-download-label">Download</span>
           </a>
           <a href="https://github.com/rxdwan/Baladio" id="hero-star-btn" class="btn btn-ghost" target="_blank"
             rel="noopener noreferrer">
@@ -119,7 +119,7 @@
     <div class="section-inner">
       <div class="section-label">Get Baladio</div>
       <h2 id="download-heading" class="section-title">Download &amp; play.</h2>
-      <p class="section-subtitle">One installer, no Node.js required. Just your music, ready to go.</p>
+      <p class="section-subtitle">Available for Windows, macOS, and Linux. No Node.js required. Just your music, ready to go.</p>
 
       <!-- Interactive Q&A -->
       <div id="download-interactive" class="download-interactive">
@@ -137,31 +137,83 @@
         </div>
       </div>
 
-      <!-- Non-technical path (original content) -->
+      <!-- Non-technical path: OS picker cards -->
       <div id="download-non-tech" style="display: none; animation: slideUpFade 0.5s forwards;">
-        <div class="download-card" id="download-card">
-          <div class="download-info">
-            <div class="download-icon" aria-hidden="true">
-              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
-                stroke-linecap="round" stroke-linejoin="round">
-                <rect x="2" y="3" width="20" height="14" rx="2" />
-                <path d="M8 21h8M12 17v4" />
+
+        <!-- Version badge -->
+        <p class="download-version-badge" id="download-meta">Fetching latest release...</p>
+
+        <!-- OS Cards -->
+        <div class="os-cards" id="os-cards">
+
+          <button class="os-card" id="os-card-windows" data-os="windows" aria-label="Download for Windows">
+            <div class="os-card-icon" aria-hidden="true">
+              <!-- Windows logo -->
+              <svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                <path d="M0 3.449L9.75 2.1v9.451H0m10.949-9.602L24 0v11.4H10.949M0 12.6h9.75v9.451L0 20.699M10.949 12.6H24V24l-12.9-1.801"/>
               </svg>
             </div>
-            <div>
-              <p class="download-app-name">Baladio Installer</p>
-              <p class="download-meta" id="download-meta">Fetching latest release...</p>
+            <div class="os-card-body">
+              <span class="os-card-name">Windows</span>
+              <span class="os-card-ext" id="win-ext">.exe</span>
             </div>
-          </div>
-          <a href="#" id="download-btn" class="btn btn-primary btn-download" aria-label="Download Baladio installer">
+            <div class="os-card-detected" id="win-detected" style="display:none;" aria-label="Detected OS">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+              Detected
+            </div>
+          </button>
+
+          <button class="os-card" id="os-card-mac" data-os="mac" aria-label="Download for macOS">
+            <div class="os-card-icon" aria-hidden="true">
+              <!-- Apple logo -->
+              <svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12.152 6.896c-.948 0-2.415-1.078-3.96-1.04-2.04.027-3.91 1.183-4.961 3.014-2.117 3.675-.546 9.103 1.519 12.09 1.013 1.454 2.208 3.09 3.792 3.039 1.52-.065 2.09-.987 3.935-.987 1.831 0 2.35.987 3.96.948 1.637-.026 2.676-1.48 3.676-2.948 1.156-1.688 1.636-3.325 1.662-3.415-.039-.013-3.182-1.221-3.22-4.857-.026-3.04 2.48-4.494 2.597-4.559-1.429-2.09-3.623-2.324-4.39-2.376-2-.156-3.675 1.09-4.61 1.09zM15.53 3.83c.843-1.012 1.4-2.427 1.245-3.83-1.207.052-2.662.805-3.532 1.818-.78.896-1.454 2.338-1.273 3.714 1.338.104 2.715-.688 3.559-1.701"/>
+              </svg>
+            </div>
+            <div class="os-card-body">
+              <span class="os-card-name">macOS</span>
+              <span class="os-card-ext" id="mac-ext">.dmg</span>
+            </div>
+            <div class="os-card-detected" id="mac-detected" style="display:none;" aria-label="Detected OS">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+              Detected
+            </div>
+          </button>
+
+          <button class="os-card" id="os-card-linux" data-os="linux" aria-label="Download for Linux">
+            <div class="os-card-icon" aria-hidden="true">
+              <!-- Linux terminal icon -->
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg">
+                <rect x="2" y="3" width="20" height="15" rx="2"/>
+                <path d="M8 10l3 3-3 3"/>
+                <path d="M13 16h3"/>
+                <path d="M2 20h20"/>
+              </svg>
+            </div>
+            <div class="os-card-body">
+              <span class="os-card-name">Linux</span>
+              <span class="os-card-ext" id="linux-ext">.deb</span>
+            </div>
+            <div class="os-card-detected" id="linux-detected" style="display:none;" aria-label="Detected OS">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+              Detected
+            </div>
+          </button>
+
+        </div>
+
+        <!-- Download button (updates on card selection) -->
+        <div class="os-download-row">
+          <a href="#" id="download-btn" class="btn btn-primary btn-download" aria-label="Download Baladio">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
               stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
               <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
               <polyline points="7 10 12 15 17 10" />
               <line x1="12" y1="15" x2="12" y2="3" />
             </svg>
-            <span id="download-btn-label">Download .exe</span>
+            <span id="download-btn-label">Download</span>
           </a>
+          <p class="os-download-hint" id="os-download-hint">Select your OS above to download</p>
         </div>
 
         <div class="requirements-grid">
@@ -174,7 +226,7 @@
             </div>
             <div>
               <p class="req-label">System</p>
-              <p class="req-value">Windows 10 or later</p>
+              <p class="req-value">Windows 10+, macOS 11+, or Linux</p>
             </div>
           </div>
           <div class="req-item">
@@ -192,13 +244,12 @@
           <div class="req-item">
             <div class="req-icon" aria-hidden="true">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                <path
-                  d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
+                <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
               </svg>
             </div>
             <div>
               <p class="req-label">Disk Space</p>
-              <p class="req-value">~70MB</p>
+              <p class="req-value">~150 MB</p>
             </div>
           </div>
           <div class="req-item">
@@ -282,9 +333,9 @@
             <h3 class="about-card-title">The Story</h3>
             <p class="about-card-text">Before Baladio, I used to sort my music in folders and treated them as playlists.
               I listened to my music by opening and playing them in VLC player. But as the number of my songs grew, 
-              it became a hassle to organize songs and listen to them. Then I had the idea of building a music player web app.
-              Then the work began. What first started as a weekend project, named "lofi music player" has now, a
-               product loading page, a logo and a proper branding.</p>
+              it became a hassle to organize songs and listen to them. Then I had the idea of building a dedicated music player web app.
+              Then the work began. What first started as a weekend project, named "lofi music player" has now evolved into a full desktop app with a
+               product page, a logo and a proper branding.</p>
           </div>
         </div>
 
@@ -328,8 +379,9 @@
           <div class="about-card-content">
             <h3 class="about-card-title">The Author</h3>
             <p class="about-card-text">Hi, I'm Ridwan. I'm an aspiring machine learning researcher. I have 6 years of
-              experience in web development, 5 years of software development in Python programming language. I'm passionate about open source projects to fight against big tech
-              companies that wants to control our lives and our data.</p>
+              experience in web development, 5 years of software development in Python programming language and 3 years of
+              experience in working with machiene learning models. I'm passionate about AI and building open source projects to fight 
+              against big tech companies that wants to control our lives and our data.</p>
           </div>
         </div>
 
