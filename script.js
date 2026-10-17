@@ -338,23 +338,21 @@
 
     if (os === 'windows') {
       commandsHtml += `
-      <span class="cmd">mkdir ..\songs</span><br/><br/>
       <span class="comment"># 4. Install yt-dlp (for YouTube downloads in the Discovery panel)</span><br/>
       <span class="comment">#    Option A: winget (recommended)</span><br/>
       <span class="cmd">winget install yt-dlp</span><br/>
       <span class="comment">#    Option B: pip</span><br/>
       <span class="cmd">pip install yt-dlp</span><br/><br/>
-      <span class="comment"># 5. Start the server, then open http://localhost:3000 in your browser</span><br/>
-      <span class="cmd">node server.js</span>
+      <span class="comment"># 5. Build the desktop app</span><br/>
+      <span class="cmd">npm run electron:build:win</span>
       `;
     } else if (os === 'mac') {
       commandsHtml += `
-      <span class="cmd">mkdir ../songs</span><br/><br/>
       <span class="comment"># 4. Install yt-dlp (for YouTube downloads in the Discovery panel)</span><br/>
       <span class="cmd">brew install yt-dlp</span><br/>
       <span class="comment">#    or: pip install yt-dlp</span><br/><br/>
-      <span class="comment"># 5. Start the server, then open http://localhost:3000 in your browser</span><br/>
-      <span class="cmd">npm start</span>
+      <span class="comment"># 5. Build the desktop app</span><br/>
+      <span class="cmd">npm run electron:build:mac</span>
       `;
     } else {
       commandsHtml += `
@@ -362,8 +360,8 @@
       <span class="comment"># 4. Install yt-dlp (for YouTube downloads in the Discovery panel)</span><br/>
       <span class="cmd">pip install yt-dlp</span><br/>
       <span class="comment">#    or Debian/Ubuntu: sudo apt install yt-dlp</span><br/><br/>
-      <span class="comment"># 5. Start the server, then open http://localhost:3000 in your browser</span><br/>
-      <span class="cmd">npm start</span>
+      <span class="comment"># 5. Build the desktop app</span><br/>
+      <span class="cmd">npm run electron:build:linux</span>
       `;
     }
 
@@ -394,6 +392,10 @@
       { 
         name: 'iTunes API', 
         icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"></path><circle cx="6" cy="18" r="3"></circle><circle cx="18" cy="16" r="3"></circle></svg>' 
+      },
+      {
+        name: 'ElectronJS',
+        icon: '<svg width="256" height="256" viewBox="0 0 256 256" stroke="currentColor" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M0 128C0 57.3075 57.3075 0 128 0C198.692 0 256 57.3075 256 128C256 198.692 198.692 256 128 256C57.3075 256 0 198.692 0 128Z" fill="#2B2E3A" fill-rule="evenodd" /></svg>'
       }
     ];
 
