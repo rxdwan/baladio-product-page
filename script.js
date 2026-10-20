@@ -45,24 +45,32 @@
   }
 })();
 
-/* ---- Hero video: load as Blob to bypass IDM interception ---- */
+/* ---- Hero video: load as binary stream to bypass IDM interception ---- */
 (function initHeroVideo() {
   const video = document.getElementById('hero-video');
+  const placeholder = document.getElementById('video-placeholder');
   if (!video) return;
-  // Fetch the video as a binary blob, then create an in-memory URL.
-  // IDM cannot intercept blob: URLs — they have no HTTP address to grab.
-  fetch('assets/demo.mp4')
-    .then(r => r.blob())
+
+  // We fetch as .dat binary blob so download managers (IDM) cannot intercept .mp4 extension
+  fetch('assets/demo.dat')
+    .then(r => {
+      if (!r.ok) throw new Error('Video stream failed: ' + r.status);
+      return r.blob();
+    })
     .then(blob => {
-      const url = URL.createObjectURL(blob);
+      const videoBlob = new Blob([blob], { type: 'video/mp4' });
+      const url = URL.createObjectURL(videoBlob);
       video.src = url;
       video.load();
       video.play().catch(() => {});
+      if (placeholder) {
+        video.addEventListener('playing', () => {
+          placeholder.style.display = 'none';
+        }, { once: true });
+      }
     })
-    .catch(() => {
-      // Fallback: direct src if fetch fails (e.g. file:// protocol)
-      video.src = 'assets/demo.mp4';
-      video.play().catch(() => {});
+    .catch((err) => {
+      console.warn('Hero video load notice:', err);
     });
 })();
 

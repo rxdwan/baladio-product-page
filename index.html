@@ -122,8 +122,8 @@
             <span>Full Screen</span>
           </button>
 
-          <!-- src set via JS to prevent download manager interception -->
-          <video id="hero-video" autoplay loop muted playsinline oncontextmenu="return false" controlsList="nodownload"
+          <!-- src set via JS as in-memory blob to prevent download manager interception -->
+          <video id="hero-video" autoplay loop muted playsinline webkit-playsinline disablePictureInPicture disableRemotePlayback oncontextmenu="return false" controlsList="nodownload nofullscreen noremoteplayback"
             style="pointer-events:none;">
           </video>
         </div>
