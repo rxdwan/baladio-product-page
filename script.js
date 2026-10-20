@@ -51,6 +51,28 @@
   const placeholder = document.getElementById('video-placeholder');
   if (!video) return;
 
+  function hidePlaceholder() {
+    if (placeholder && placeholder.style.display !== 'none') {
+      placeholder.style.opacity = '0';
+      placeholder.style.transition = 'opacity 0.4s ease';
+      setTimeout(() => {
+        placeholder.style.display = 'none';
+      }, 400);
+    }
+  }
+
+  // Ensure autoplay compliance properties
+  video.muted = true;
+  video.defaultMuted = true;
+  video.playsInline = true;
+
+  // Listen to multiple progress events so placeholder hides reliably
+  video.addEventListener('playing', hidePlaceholder, { once: true });
+  video.addEventListener('canplay', hidePlaceholder, { once: true });
+  video.addEventListener('timeupdate', () => {
+    if (video.currentTime > 0) hidePlaceholder();
+  }, { once: true });
+
   // We fetch as .dat binary blob so download managers (IDM) cannot intercept .mp4 extension
   fetch('assets/demo.dat')
     .then(r => {
@@ -62,11 +84,31 @@
       const url = URL.createObjectURL(videoBlob);
       video.src = url;
       video.load();
-      video.play().catch(() => {});
-      if (placeholder) {
-        video.addEventListener('playing', () => {
-          placeholder.style.display = 'none';
-        }, { once: true });
+
+      const playPromise = video.play();
+      if (playPromise !== undefined) {
+        playPromise
+          .then(() => {
+            hidePlaceholder();
+          })
+          .catch(() => {
+            // Autoplay blocked by browser policy: resume on first user interaction
+            const resumeOnInteraction = () => {
+              video.play().catch(() => {});
+              hidePlaceholder();
+              window.removeEventListener('click', resumeOnInteraction);
+              window.removeEventListener('scroll', resumeOnInteraction);
+              window.removeEventListener('touchstart', resumeOnInteraction);
+            };
+            window.addEventListener('click', resumeOnInteraction, { once: true });
+            window.addEventListener('scroll', resumeOnInteraction, { once: true });
+            window.addEventListener('touchstart', resumeOnInteraction, { once: true });
+          });
+      }
+
+      // If video has already buffered/started
+      if (video.readyState >= 2 || video.currentTime > 0) {
+        hidePlaceholder();
       }
     })
     .catch((err) => {
@@ -960,6 +1002,14 @@ document.addEventListener('DOMContentLoaded', () => {
       }, 50);
     } else {
       window.scrollTo(0, 0);
+    }
+
+    // Resume hero video if returning to home view
+    if (isHome) {
+      const heroVid = document.getElementById('hero-video');
+      if (heroVid && heroVid.src && heroVid.paused) {
+        heroVid.play().catch(() => {});
+      }
     }
   }
 
