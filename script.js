@@ -45,8 +45,6 @@
   }
 })();
 
-/* ---- Sparkles removed by user request ---- */
-
 /* ---- Hero video: load as Blob to bypass IDM interception ---- */
 (function initHeroVideo() {
   const video = document.getElementById('hero-video');
@@ -204,7 +202,7 @@
     linux: {
       label:    'Linux',
       ext:      '.deb',
-      match:    (name) => name.endsWith('.deb'),
+      match:    (name) => name.endsWith('.deb') || name.endsWith('.AppImage'),
     },
   };
 
@@ -245,7 +243,7 @@
   function initOSCards() {
     const detectedOS = detectOS();
 
-    // Update hero CTA label
+    // Update hero CTA label immediately
     if (heroDlLabel) {
       const cfg = OS_CONFIG[detectedOS];
       heroDlLabel.textContent = cfg ? `Download for ${cfg.label}` : 'Download';
@@ -257,21 +255,29 @@
       if (badge) badge.style.display = (os === detectedOS) ? 'flex' : 'none';
     });
 
-    // Wire up card click events
+    // Wire up card click events (only once)
     document.querySelectorAll('.os-card').forEach((card) => {
-      card.addEventListener('click', () => selectOSCard(card.dataset.os));
+      if (!card.dataset.bound) {
+        card.dataset.bound = 'true';
+        card.addEventListener('click', () => selectOSCard(card.dataset.os));
+      }
     });
 
     // Auto-select detected OS
     if (OS_CONFIG[detectedOS]) {
       selectOSCard(detectedOS);
+    } else {
+      selectOSCard('windows');
     }
   }
 
-  // Fetch release data
-  fetch(API_URL)
+  // Initialize OS cards immediately on page load
+  initOSCards();
+
+  // Fetch release data with cache-busting to ensure latest release is always returned
+  fetch(`${API_URL}?_=${Date.now()}`, { cache: 'no-store' })
     .then((r) => {
-      if (!r.ok) throw new Error('API error');
+      if (!r.ok) throw new Error('API error: ' + r.status);
       return r.json();
     })
     .then((data) => {
@@ -287,14 +293,16 @@
         metaEl.textContent = `Version ${version}${date ? ' \u00b7 Released ' + date : ''}`;
       }
 
-      // Map assets by OS
+      // Map assets by OS (preferring .deb over .AppImage for Linux if both present)
       (data.assets || []).forEach((asset) => {
         Object.entries(OS_CONFIG).forEach(([os, cfg]) => {
-          if (!releaseAssets[os] && cfg.match(asset.name)) {
-            releaseAssets[os] = asset;
-            // Update ext label in card
-            const extEl = document.getElementById(`${os}-ext`);
-            if (extEl) extEl.textContent = asset.name.substring(asset.name.lastIndexOf('.'));
+          if (cfg.match(asset.name)) {
+            if (!releaseAssets[os] || (os === 'linux' && asset.name.endsWith('.deb'))) {
+              releaseAssets[os] = asset;
+              // Update ext label in card
+              const extEl = document.getElementById(`${os}-ext`);
+              if (extEl) extEl.textContent = asset.name.substring(asset.name.lastIndexOf('.'));
+            }
           }
         });
       });
@@ -302,7 +310,8 @@
       // Refresh download button for currently selected OS
       if (selectedOS) updateDownloadBtn(selectedOS);
     })
-    .catch(() => {
+    .catch((err) => {
+      console.warn('Could not fetch latest release:', err);
       if (metaEl) metaEl.textContent = 'Latest release';
     });
 
@@ -314,13 +323,15 @@
   const techView     = document.getElementById('download-tech');
   const resetBtn     = document.getElementById('btn-reset-download');
   const termBody     = document.getElementById('terminal-commands');
+  const heroDlBtn    = document.getElementById('hero-download-btn');
 
-  function detectOS() {
-    const ua = navigator.userAgent.toLowerCase();
-    if (ua.includes('win')) return 'windows';
-    if (ua.includes('mac')) return 'mac';
-    if (ua.includes('linux')) return 'linux';
-    return 'unknown';
+  // If hero CTA is clicked, reveal the non-tech download cards directly
+  if (heroDlBtn && interactiveQ && nonTechView) {
+    heroDlBtn.addEventListener('click', () => {
+      interactiveQ.style.display = 'none';
+      if (techView) techView.style.display = 'none';
+      nonTechView.style.display = 'block';
+    });
   }
 
   function renderTerminalCommands() {
@@ -333,7 +344,7 @@
       <span class="cmd">cd Baladio</span><br/><br/>
       <span class="comment"># 2. Install dependencies</span><br/>
       <span class="cmd">npm install</span><br/><br/>
-      <span class="comment"># 3. Create a songs/ folder one level ABOVE Baladio/ and drop your audio files in it</span><br/>
+      <span class="comment"># 3. Create a songs/ folder at Music folder and drop your audio files in it</span><br/>
     `;
 
     if (os === 'windows') {
@@ -417,7 +428,7 @@
     techNoBtn.addEventListener('click', () => {
       interactiveQ.style.display = 'none';
       nonTechView.style.display = 'block';
-      initOSCards();
+      if (selectedOS) updateDownloadBtn(selectedOS);
     });
 
     resetBtn.addEventListener('click', () => {
@@ -846,9 +857,38 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 });
 
+/* ---- FAQ Accordion Interaction ---- */
+(function initFaq() {
+  const accordion = document.getElementById('faq-accordion');
+  if (!accordion) return;
+
+  accordion.addEventListener('click', (e) => {
+    const btn = e.target.closest('.faq-question');
+    if (!btn) return;
+
+    const item = btn.closest('.faq-item');
+    if (!item) return;
+
+    const isOpen = item.classList.contains('open');
+
+    // Close other open items
+    accordion.querySelectorAll('.faq-item.open').forEach((openItem) => {
+      if (openItem !== item) {
+        openItem.classList.remove('open');
+        const qBtn = openItem.querySelector('.faq-question');
+        if (qBtn) qBtn.setAttribute('aria-expanded', 'false');
+      }
+    });
+
+    // Toggle current
+    item.classList.toggle('open', !isOpen);
+    btn.setAttribute('aria-expanded', String(!isOpen));
+  });
+})();
+
 /* ---- SPA Routing (Hash-based) ---- */
 (function initRouting() {
-  const views = ['hero', 'download', 'changelog', 'about'];
+  const views = ['hero', 'download', 'changelog', 'about', 'faq'];
 
   // Blur overlay for transitions
   const overlay = document.createElement('div');
@@ -876,11 +916,12 @@ document.addEventListener('DOMContentLoaded', () => {
   function updateView(hash) {
     // Empty hash or '#' = home
     const viewId = views.includes(hash) ? hash : 'hero';
+    const isHome = (viewId === 'hero' || viewId === 'faq');
 
     views.forEach(id => {
       const el = document.getElementById(id);
       if (el) {
-        if (id === viewId) {
+        if ((id === 'hero' && isHome) || (id === 'faq' && isHome) || (id === viewId && !isHome)) {
           el.style.display = (id === 'hero') ? 'flex' : 'block';
           setTimeout(() => {
             el.style.opacity = '1';
@@ -904,7 +945,14 @@ document.addEventListener('DOMContentLoaded', () => {
       window.toggleScrollTopBtn(viewId === 'changelog');
     }
 
-    window.scrollTo(0, 0);
+    if (viewId === 'faq') {
+      setTimeout(() => {
+        const faqEl = document.getElementById('faq');
+        if (faqEl) faqEl.scrollIntoView({ behavior: 'smooth' });
+      }, 50);
+    } else {
+      window.scrollTo(0, 0);
+    }
   }
 
   // Intercept hash-based links AND the home '/' link
